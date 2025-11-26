@@ -1,0 +1,32 @@
+name: test-devs-uefs-everson
+
+networks:
+  test-devs-uefs-everson-network:
+    name: test-devs-uefs-everson-network
+    driver: bridge
+
+services:
+  app:
+    image: test-devs-uefs-everson
+    build: ./docker
+    container_name: '${COMPOSE_PROJECT_NAME}-app'
+    ports: 
+      - "80:80"
+    networks:
+      - test-devs-uefs-everson-network
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - db
+  db:
+    container_name: '${COMPOSE_PROJECT_NAME}-db'
+    image: mysql:8.4
+    ports: 
+      - "3306:3306"
+    networks:
+      - test-devs-uefs-everson-network
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
