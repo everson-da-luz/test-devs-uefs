@@ -70,7 +70,7 @@ class UserController extends Controller
             $response = [
                 'success' => false,
                 'code' => 404,
-                'message' => 'Usuário não encontrado',
+                'message' => 'Usuário não encontrado.',
                 'data' => []
             ];
         } else {
