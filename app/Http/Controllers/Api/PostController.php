@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Post;
+use App\Models\PostTag;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -150,6 +151,86 @@ class PostController extends Controller
                 'success' => true,
                 'code' => 200,
                 'message' => 'Postagem excluida com sucesso.',
+                'data' => $dataRequest
+            ];
+        } catch (\Exception $e) {
+            $response = [
+                'success' => false,
+                'code' => 500,
+                'message' => $e->getMessage(),
+                'data' => []
+            ];
+        }
+
+        return response()->json($response, $response['code']);
+    }
+
+    public function postTag(Request $request): JsonResponse
+    {
+        $dataPost = $request->post();
+        $validator = Validator::make($dataPost, PostTag::rules('insert', $dataPost['posts_id']), PostTag::errorMessage('insert'));
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'code' => 422,
+                'message' => $validator->errors()->all(),
+                'data' => $dataPost
+            ], 422);
+        }
+
+        try {
+            $modelPost = new Post();
+            $post = $modelPost->getById($dataPost['posts_id']);
+
+            if (! $post->tags()->syncWithoutDetaching([$dataPost['tags_id']])) {
+                throw new \Exception('Houve um erro ao tentar adicionar a tag na postagem.');
+            }
+
+            $response = [
+                'success' => true,
+                'code' => 200,
+                'message' => 'Tag adicionada na postagem com sucesso.',
+                'data' => $dataPost
+            ];
+        } catch (\Exception $e) {
+            $response = [
+                'success' => false,
+                'code' => 500,
+                'message' => $e->getMessage(),
+                'data' => []
+            ];
+        }
+
+        return response()->json($response, $response['code']);
+    }
+
+    public function deleteTag(Request $request): JsonResponse
+    {
+        $dataRequest = $request->post();
+        $validator = Validator::make($dataRequest, PostTag::rules('delete', $dataRequest['posts_id']), PostTag::errorMessage('delete'));
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'code' => 422,
+                'message' => $validator->errors()->all(),
+                'data' => $dataRequest
+            ], 422);
+        }
+
+        try {
+            $modelPost = new Post();
+            $post = $modelPost->getById($dataRequest['posts_id']);
+
+            if (! $post->tags()->detach([$dataRequest['tags_id']])) {
+                throw new \Exception('Houve um erro ao tentar remover a tag da postagem.');
+            }
+
+            $response = [
+                'success' => true,
+                'code' => 200,
+                'message' => 'Tag removida da postagem com sucesso.',
                 'data' => $dataRequest
             ];
         } catch (\Exception $e) {
