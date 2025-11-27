@@ -65,6 +65,10 @@ class User extends Authenticatable
             ],
             'delete' => [
                 'id' => 'required|integer|exists:users,id',
+            ],
+            'login' => [
+                'email' => 'required|email',
+                'password' => 'required'
             ]
         ];
 
@@ -115,6 +119,15 @@ class User extends Authenticatable
                     'integer' => 'ID deve ser um número.',
                     'exists' => 'Usuário não encontrado.'
                 ]
+            ],
+            'login' => [
+                'email' => [
+                    'required' => 'E-mail obrigatório.',
+                    'email' => 'O e-mail está no formato errado.'
+                ],
+                'password' => [
+                    'required' => 'Senha obrigatória.',
+                ]
             ]
         ];
 
@@ -133,6 +146,16 @@ class User extends Authenticatable
     public function getById(int $id):? User
     {        
         return $this->find($id);
+    }
+
+    public function getByEmail($email):? User
+    {        
+        return $this->where('email', $email)->first();
+    }
+
+    public function getByApiToken($apiToken):? User
+    {        
+        return $this->where('api_token', $apiToken)->first();
     }
 
     public function updateUser($data): bool
