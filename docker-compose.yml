@@ -25,6 +25,8 @@ services:
       - "3306:3306"
     networks:
       - test-devs-uefs-everson-network
+    volumes:
+      - ./docker/db/persist-data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: ${DB_DATABASE}
