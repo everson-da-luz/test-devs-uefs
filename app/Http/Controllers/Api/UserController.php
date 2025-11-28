@@ -112,7 +112,7 @@ class UserController extends Controller
                 'success' => true,
                 'code' => 200,
                 'message' => 'Usuário atualizado com sucesso.',
-                'data' => $userUpdated
+                'data' => $dataRequest
             ];
         } catch (\Exception $e) {
             $response = [

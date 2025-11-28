@@ -113,7 +113,7 @@ class PostController extends Controller
                 'success' => true,
                 'code' => 200,
                 'message' => 'Postagem atualizada com sucesso.',
-                'data' => $postUpdated
+                'data' => $dataRequest
             ];
         } catch (\Exception $e) {
             $response = [

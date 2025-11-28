@@ -112,7 +112,7 @@ class TagController extends Controller
                 'success' => true,
                 'code' => 200,
                 'message' => 'Tag atualizada com sucesso.',
-                'data' => $tagUpdated
+                'data' => $dataRequest
             ];
         } catch (\Exception $e) {
             $response = [

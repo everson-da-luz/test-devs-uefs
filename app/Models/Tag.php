@@ -5,12 +5,15 @@ namespace App\Models;
 use App\Models\Post;
 use App\Models\PostTag;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Tag extends Model
 {
+    use HasFactory;
+    
     protected $table = 'tags';
 
     protected $fillable = [
