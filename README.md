@@ -1,98 +1,235 @@
-# Teste Técnico para a vaga de Engenheiro de Software no projeto UEFS - Netra
+# Teste técnico - Projeto UEFS - Netra
+Projeto utilizado para um teste técnico, não existe uma aplicação em produção que rode esse código. Esse projeto consiste em desenvolver uma API Restful utilizando PHP, Laravel, um sistema de gerenciamento de banco de dados (SGBD) e Docker.
 
-Este desafio técnico é destinado aos candidatos à posição de Engenheiro de Software no projeto UEFS - NETRA. O objetivo é avaliar competências práticas em desenvolvimento de software por meio da criação de uma API RESTful utilizando PHP (Laravel 8 ou superior), um Sistema de Gerenciamento de Banco de Dados (SGBD) de sua escolha, e Docker.
+## Instalação
+Faça o clone desse repositório:
+```
+git clone https://github.com/everson-da-luz/test-devs-uefs.git
+```
+Acesse a pasta criada:
+```
+cd test-devs-uefs
+```
+Faça uma cópia do arquivo `.env-example`:
+```
+cp .env.example .env
+```
+**Observação:** Já modifiquei o arquivo `.env-example` para não precisar alterar o arquivo `.env`, nele coloquei a conexão com o banco de dados que será criado no `docker-compose.yml`.
 
-O prazo para a realização do teste é de 5 dias corridos, e a entrega deve ser feita por meio de um repositório no GitHub.
+Após isso basta buildar o projeto com o comando:
+```
+docker-compose build
+```
+Após o build finalizado, será criado uma nova imagem Docker chamada `test-devs-uefs-everson`.
 
-Para participar, faça um fork deste repositório, aplique a solução proposta e envie para nossa análise.
+Monte e suba os containers:
+```
+docker-compose up
+```
+ou
+```
+docker-compose up -d
+```
+**Observação:** Caso use o comando `docker-compose up -d`, no terminal será mostrado que finalizou, porém ainda está sendo executado alguns comandos por trás. Então é necessário esperar alguns segundos até finalizar de fato. Caso esteja usando o comando `docker-compose up` será possível ver tudo que está sendo feito.
 
----
+Quando os containers estão sendo montados, é executado o arquivo `docker/entrypoint.sh`. Nesse arquivo coloquei comandos que serão executados cada vez que os containers subirem, como por exemplo criação da pasta `vendor`, geração da key do Laravel que será inserida no arquivo `.env` e permissões de pastas necessárias para rodar aplicações Laravel.
 
-## Escopo do Teste Técnico
+Após os containers subirem foi criado dois containers, um para a aplicação chamado `test-devs-uefs-everson-app` rodando na porta 80 e outro para o banco de dados chamado `test-devs-uefs-everson-db` rodando na porta 3306, bem como uma rede chamada `test-devs-uefs-everson-network`.
 
-Você deverá desenvolver uma API RESTful com as seguintes funcionalidades:
+**ATENÇÃO:** Se você tem outras aplicações ou containers rodando nas portas **80** e **3306** as mesmas devem ser finalizadas para não conflitar com os containers criados para o teste.
 
-- CRUD de **Usuários**
-- CRUD de **Posts**
-- CRUD de **Tags**
+Rode as migrations para criar as tabelas no banco de dados:
+```
+docker-compose exec app php artisan migrate
+```
 
-### Regras de Relacionamento
+Rode as seeds para popular um usuário na tabela users:
+```
+docker-compose exec app php artisan db:seed
+```
+Esse último comando criará um usuário de e-mail `test@example.com` com a senha `123456`.
 
-- Um **usuário** pode ter várias **postagens**.
-- Uma **postagem** pode conter várias **tags** (palavras-chave).
+## Endpoints da API e como utilizar
+Para testar a API utilizei o programa Insomnia (https://insomnia.rest). Adicionei um arquivo com os endpoints para serem importados no Insomnia e facilitar os testes, esse arquivo encontra-se na pasta `docs/collection-uefs-everson.yaml`.
 
-### Requisitos Técnicos do Projeto
+Segue as possíveis rotas da API:
 
-- Todas as rotas devem seguir o padrão `/api`, por exemplo: `/api/posts`.
-- Fornecer um `Dockerfile` e `docker-compose.yml` para execução do projeto.
-- Incluir documentação(README) clara sobre como rodar o projeto localmente, como testar os endpoints, visão geral da arquitetura e estrutura do projeto e destaques sobre decisões técnicas e particularidades da implementação.
+### Auth (Autenticação)
+#### Logar e autenticar na API (POST)
+```
+http://localhost/api/login
+```
+Deve ser passado no `Body` os seguintes dados como `JSON`:
+ - email
+ - password
 
----
+**ATENÇÃO**: Já deixei um usuário criado `test@example.com` no banco de dados, a senha dele é `123456`.
 
-## Avaliação Técnica (durante o **teste prático**)
+#### Deslogar da API (POST)
+```
+http://localhost/api/logout
+```
+Enviar o token gerado na autenticação, enviando-o como `Auth` `Bearer Token`.
 
-Serão avaliados os seguintes pontos conforme o nível de senioridade:
+### Users (Usuários)
+#### Obtém todos usuários (GET)
+```
+http://localhost/api/users
+```
+Enviar o token gerado na autenticação, enviando-o como `Auth` `Bearer Token`.
 
-### Para Todos os Níveis
+#### Obtém um usuário por ID (GET)
+```
+http://localhost/api/users/{id}
+```
+Enviar o token gerado na autenticação, enviando-o como `Auth` `Bearer Token`.
 
-- Conhecimento e uso de recursos do Laravel  
-- Familiaridade com Docker e Docker Compose  
-- Organização, clareza e estrutura do código  
-- Implementação funcional da API RESTful  
-- Utilização adequada do banco de dados escolhido  
+#### Criar um usuário (POST)
+```
+http://localhost/api/users
+```
+Deve ser passado no `Body` os seguintes dados como `JSON`:
+ - name
+ - email
+ - password
 
-### Nível Júnior
+Enviar o token gerado na autenticação, enviando-o como `Auth` `Bearer Token`.
 
-- Fundamentos de lógica de programação  
-- Conhecimento básico dos princípios SOLID  
-- Adesão aos padrões PSR (estilo de código PHP)  
-- Uso inicial de testes (PHPUnit ou Pest) — **não obrigatório**  
+#### Editar um usuário (PUT)
+```
+http://localhost/api/users/{id}
+```
+Deve ser passado no `Body` os seguintes dados como `JSON`:
+ - name
+ - email
+ - password
 
-### Nível Pleno
+Enviar o token gerado na autenticação, enviando-o como `Auth` `Bearer Token`.
 
-- Lógica de programação mais estruturada  
-- Aplicação consistente dos princípios SOLID  
-- Implementação de testes unitários (PHPUnit ou Pest)  
-- Boas práticas de performance e legibilidade do código  
+#### Excluir um usuário (DELETE)
+```
+http://localhost/api/users/{id}
+```
+Enviar o token gerado na autenticação, enviando-o como `Auth` `Bearer Token`.
 
-### Nível Sênior
+### Posts (Postagens)
+#### Obtém todas as postagens (GET)
+```
+http://localhost/api/posts
+```
+Enviar o token gerado na autenticação, enviando-o como `Auth` `Bearer Token`.
 
-- Arquitetura bem definida e organização do projeto  
-- Uso estratégico dos princípios SOLID em componentes reutilizáveis  
-- Testes completos (unitários e, se possível, de integração)  
-- Otimizações de performance no código e consultas  
-- Documentação técnica clara e abrangente (API, arquitetura, setup)  
-- Uso de boas práticas de versionamento e estruturação do repositório  
+#### Obtém uma postagem por ID (GET)
+```
+http://localhost/api/posts/{id}
+```
+Enviar o token gerado na autenticação, enviando-o como `Auth` `Bearer Token`.
 
----
+#### Criar uma postagem (POST)
+```
+http://localhost/api/posts
+```
+Deve ser passado no `Body` os seguintes dados como `JSON`:
+ - users_id
+ - title
+ - slug
+ - content
 
-## Avaliação Complementar (durante a **entrevista técnica**)
+Enviar o token gerado na autenticação, enviando-o como `Auth` `Bearer Token`.
 
-Após a entrega e análise do teste prático, os candidatos que avançarem para a próxima etapa participarão de uma entrevista técnica, onde serão avaliados critérios como:
+#### Editar uma postagem (PUT)
+```
+http://localhost/api/posts/{id}
+```
+Deve ser passado no `Body` os seguintes dados como `JSON`:
+ - users_id
+ - title
+ - slug
+ - content
 
-- Clareza na explicação de decisões técnicas  
-- Capacidade de análise e resolução de problemas  
-- Conhecimento sobre arquitetura de software e design de soluções  
-- Abordagem colaborativa e visão de liderança técnica (para cargos mais seniores)  
-- Nível de profundidade em testes, padrões, e boas práticas além do que foi entregue  
+Enviar o token gerado na autenticação, enviando-o como `Auth` `Bearer Token`.
 
----
+#### Excluir uma postagem (DELETE)
+```
+http://localhost/api/posts/{id}
+```
+Enviar o token gerado na autenticação, enviando-o como `Auth` `Bearer Token`.
 
-## Recursos Opcionais (recomendados, mas não obrigatórios)
+#### Adicionar uma tag a uma postagem (POST)
+```
+http://localhost/api/posts/tag
+```
+Deve ser passado no `Body` os seguintes dados como `JSON`:
+ - posts_id
+ - tags_id
 
-- Documentação automática com Swagger ou Scribe  
-- Interface gráfica simples para consulta dos dados (React, Vue, Blade, Livewire, etc.)  
+Enviar o token gerado na autenticação, enviando-o como `Auth` `Bearer Token`.
 
----
+#### Remover uma tag de uma postagem (DELETE)
+```
+http://localhost/api/posts/tag
+```
+Deve ser passado no `Body` os seguintes dados como `JSON`:
+ - posts_id
+ - tags_id
 
-## Retorno
+Enviar o token gerado na autenticação, enviando-o como `Auth` `Bearer Token`.
 
-Após a análise técnica:
 
-- Se aprovado, entraremos em contato para a entrevista técnica.  
-- Se não aprovado, forneceremos um retorno com os principais pontos de melhoria observados.
+### Tags (Tags)
+#### Obtém todas as tags (GET)
+```
+http://localhost/api/tags
+```
+Enviar o token gerado na autenticação, enviando-o como `Auth` `Bearer Token`.
 
----
+#### Obtém uma tag por ID (GET)
+```
+http://localhost/api/tags/{id}
+```
+Enviar o token gerado na autenticação, enviando-o como `Auth` `Bearer Token`.
 
-**Boa sorte!**  
-Equipe de Desenvolvimento NETRA – Projeto UEFS
+#### Criar uma tag (POST)
+```
+http://localhost/api/tags
+```
+Deve ser passado no `Body` os seguintes dados como `JSON`:
+ - name
+
+Enviar o token gerado na autenticação, enviando-o como `Auth` `Bearer Token`.
+
+#### Editar uma tag (PUT)
+```
+http://localhost/api/tags/{id}
+```
+Deve ser passado no `Body` os seguintes dados como `JSON`:
+ - name
+
+Enviar o token gerado na autenticação, enviando-o como `Auth` `Bearer Token`.
+
+#### Excluir uma tag (DELETE)
+```
+http://localhost/api/tags/{id}
+```
+Enviar o token gerado na autenticação, enviando-o como `Auth` `Bearer Token`.
+
+## Testes
+Criei tanto testes unitários na pasta `tests/Unit` quanto testes de integração na pasta `tests/Feature`.  
+Para rodar os testes utilizar o seguinte comando:
+```
+docker-compose exec app php artisan test
+```
+
+## Visão sobre o projeto
+Criei uma imagem Docker com base na imagem `php:8.4-apache`, a qual instala o PHP 8.4 e o Apache como servidor.  
+Criei um middleware para verificar a existência do token e validar se o mesmo foi gerado. Também desenvolvi uma controller para cada contexto da aplicação, separando bem as responsabilidades de negócio.  
+Também desenvolvi migrations, seeds, factories e testes.
+
+De banco de dados instalei o MySQL 8.4, e criei 4 tabelas:
+- users
+- posts
+- tags
+- posts_tags
+
+Vou deixar o diagrama ER na pasta `docs/er-uefs-everson.png`.  
+Criei models bem estruturadas, com responsabilidades únicas e com os relacionamentos definidos.
